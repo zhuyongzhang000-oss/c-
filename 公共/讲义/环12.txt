@@ -1,0 +1,212 @@
+@title 结构体与链表
+@short 结构体
+@desc C 语言环12：结构体类型和变量、逐成员输入输出、记录表统计、整条记录排序、结构体指针和参数、链表建立与删除，以及分号、三种定义方式、. 和 ->、整体赋值、sizeof、共用体、枚举、typedef。
+@summary 学生成绩表、日期第几天、打印记录、按分数排序、链表删除结点。细节：} 后的分号、三种定义方式、. 和 ->、整体赋值、union、enum、typedef。
+@intro 结构体把一个人的学号、姓名、成绩捆成一条记录。这一环的题都是「记录表」：输入、统计、排序、输出。抓住一点：**比较的是某个成员，交换的是整条记录**。最后讲链表，要用到环11 的 malloc。
+
+== recall
+scanf 读入字符数组 name => 不加 &：`scanf("%s", name);` @ 环08 细4
+`char s[20]; s = "Li";` 合法吗 => 不合法，要用 `strcpy(s, "Li");` @ 环08 细3
+函数要改 main 里的变量，参数要传 => 它的地址 @ 环09 ⑤
+`*p++` 是先 `*` 还是先 `++` => 先 p++（后缀运算符结合得更紧） @ 环11 ③
+malloc 申请失败返回 => NULL @ 环11 细10
+==
+
+# p1 | 编程题怎么写 | 结构体题的难点不在算法（排序、找最大都是前面学过的），而在「成员怎么取」。
+
+## gu | 骨架 | | 通用骨架
+::code
+struct Stu {
+    int num;
+    char name[20];
+    double score;
+};                                     // 分号不能漏
+
+struct Stu s[N];
+for (i = 0; i < n; i++)
+    scanf("%d %s %lf", &s[i].num, s[i].name, &s[i].score);
+::
+
+## s1 | ① 类型和变量 | ① | 先定义类型，再用类型定义变量
+`struct Stu { … };` 只是定义了一个**类型**，不分配内存。类型名是 `struct Stu` 两个词。之后 `struct Stu a = {101, "Li", 88.5};` 才是变量。
+
+取成员用点：`a.num` 是 {{101}}，`a.name` 是 {{Li}}。
+
+题2 的日期：`struct Date { int year, month, day; };`，用 `d.year`、`d.month`、`d.day` 取，算法和环01 ⑦ 完全一样。
+
+## s2 | ② 逐个成员输入输出 | ② | 输入输出：一个成员一个成员来
+::calc
+scanf("%d %s %lf", &a.num, a.name, &a.score); ‖  ‖ 对
+scanf("%d", &a); ‖  ‖ 错 ‖ 结构体不能整体输入
+scanf("%s", &a.name); ‖  ‖ 错 ‖ 字符数组成员多了 &（回顾第 1 题）
+printf("%d %s %.1f\n", a.num, a.name, a.score); ‖  ‖ 对 ‖ 输出也逐个成员
+::
+
+## s3 | ③ 统计和找最高 | ③ | 记录表统计：找最高的，记下标
+::code
+best = 0; sum = 0;
+for (i = 0; i < n; i++) {
+    sum += s[i].score;
+    if (s[i].score > s[best].score) best = i;
+}
+printf("%d %s %.1f\n", s[best].num, s[best].name, s[best].score);
+::
+记**下标**而不是记分数：最后要输出的是这个人的整条记录（道理和环06 ② 一样）。
+
+三条记录 {3, Wu, 70}、{1, Zh, 95}、{2, Qi, 82}：平均 {{82.33}}，最高的是 {{1 Zh 95.0}}。
+
+## s4 | ④ 交换整条记录 | ④ | 排序：比成员，换整条
+::code
+if (s[j].score < s[j + 1].score) {
+    t = s[j]; s[j] = s[j + 1]; s[j + 1] = t;     // t 是 struct Stu
+}
+::
+同类型的结构体变量**可以整体赋值**，`t = s[j];` 一句就复制了所有成员，连 name 数组一起。
+
+~~只交换 score~~，分数换了、名字没换，就张冠李戴了。上面三条按分数从高到低排完是 {{1 Zh 95 / 2 Qi 82 / 3 Wu 70}}。
+
+## s5 | ⑤ 结构体指针 | ⑤ | 结构体指针：p->成员
+`struct Stu *p = &a;` 之后，`p->score` 就是 `(*p).score`，也就是 `a.score`。
+
+括号不能省：~~`*p.score`~~ 是 `*(p.score)`，因为 `.` 比 `*` 先算，而 p 不是结构体变量（细3）。
+
+## s6 | ⑥ 结构体作参数 | ⑥ | 结构体作参数：传值改不到，传指针才能改
+::pair 传值 | 传指针
+void raise_val(struct Stu s)
+{
+    s.score += 5;
+}
+// raise_val(a);
+---
+void raise_ptr(struct Stu *p)
+{
+    p->score += 5;
+}
+// raise_ptr(&a);
+::
+a.score 原来是 60：左边调用后是 {{60}}，右边是 {{65}}。和环09 ⑤ 的 swap 一模一样，这次复制过去的是整条记录。
+
+结构体**数组**作参数时传的是地址，函数能直接改（环06 细6），所以题4 的 `fun(STREC a[], int n)` 排完序 main 里就看得到。
+
+## s7 | ⑦ 链表 | ⑦ | 链表：结点用 malloc 申请，next 串起来
+::code
+struct Node {
+    int num;
+    struct Node *next;          // 指向下一个结点
+};
+::
+三个结点串起来的样子：
+::out
+head
+ │
+ ▼
+┌────┬───┐   ┌────┬───┐   ┌────┬──────┐
+│ 10 │ ●─┼──▶│ 20 │ ●─┼──▶│ 30 │ NULL │
+└────┴───┘   └────┴───┘   └────┴──────┘
+::
+遍历：`for (p = head; p != NULL; p = p->next) printf("%d ", p->num);`
+
+新结点用 `q = (struct Node *)malloc(sizeof(struct Node));` 申请，记得判 NULL、把 `q->next` 设成 NULL。释放整条链表时，要**先存下 next 再 free**，不然 free 以后就找不到下一个了。
+
+## s8 | ⑧ 删除结点 | ⑧ | 删除结点：前一个的 next 跳过它
+找到要删的结点 p，同时记住它前面那个 pre：
+::code
+pre = NULL; p = head;
+while (p != NULL && p->num != key) { pre = p; p = p->next; }
+if (p != NULL) {
+    if (pre == NULL) head = p->next;     // 删的是第一个：头指针要变
+    else pre->next = p->next;            // 前一个直接指向后一个
+    free(p);
+}
+::
+10 → 20 → 30 删掉 20，剩下 {{10 → 30}}。
+
+两个边界一定要想到：删的是**第一个**结点（head 要变，所以函数要返回新的 head）；**找不到**（p 走到 NULL，什么都不做）。
+
+# p2 | 结构体、共用体、枚举的规矩 | 每一节最后附了真题的问法，灰色小字是出处。
+
+## d1 | 细1 } 后面的分号 | 细1 | 类型声明的 } 后面必须有分号
+~~`struct Bad { int x; }`~~ 漏了分号，下一句就会报一串莫名其妙的错。川师本科卷考了两次。
+::exam
+结构体类型声明 @ 川师卷2018-19 一-9
+同上 @ 川师卷2022-23 一-6
+::
+
+## d2 | 细2 三种定义方式 | 细2 | 定义结构体变量的三种方式
+- 先声明类型，再定义变量：`struct Stu s1;`
+- 声明类型的同时定义变量：`struct Stu { … } s1, s2;`
+- 不要类型名，直接定义：`struct { … } s1;`（以后不能再用这个类型定义别的变量）
+
+加上 typedef 还有一种：`typedef struct { … } STREC;` 之后 `STREC s;`。题4 就是这种。
+::exam
+定义结构体变量的方式 @ 川师卷2022-23 判断5
+::
+
+## d3 | 细3 . 和 -> | 细3 | 变量用 .，指针用 ->
+`struct worker { int no; char *name; } work, *p = &work;`
+::calc
+work.no ‖  ‖ 对
+(*p).no ‖  ‖ 对
+p->no ‖  ‖ 对
+work->no ‖  ‖ 错 ‖ work 不是指针
+*p.no ‖  ‖ 错 ‖ 等于 *(p.no)
+::
+结构体套结构体，就一层一层点下去：
+::code
+struct BOOK { struct { int year, month, day; } publish; } bk;
+bk.publish.year = 1998;      // 对
+bk.year = 1998;              // 错：bk 没有叫 year 的成员
+::
+::exam
+`work->no` 是哪种错 => work 不是指针，不能用 -> @ 真选42·中财2018
+给出版年份赋值 => `bk.publish.year = 1998;` @ 真选14·武科大2019
+成员引用方式 @ 川师卷2019-20 二-3
+::
+
+## d4 | 细4 能整体赋值，不能整体比 | 细4 | 能整体赋值，不能整体比较
+::calc
+b = a;（同类型） ‖  ‖ 对 ‖ 所有成员一起复制
+if (a == b) ‖  ‖ 错 ‖ 结构体不能用 == 比
+b.name = "Wang"; ‖  ‖ 错 ‖ 数组成员也不能用 = 赋字符串
+strcpy(b.name, "Wang"); ‖  ‖ 对
+::
+`b = a;` 之后再 `strcpy(b.name, "Wang");`，a.name 还是 {{Li}}：整体赋值是复制，两条记录互不影响。
+
+## d5 | 细5 结构体数组初始化 | 细5 | 结构体数组初始化和取成员里的字符
+::code
+struct person { char title[20]; int code; };
+struct person book[5] = {{"Physics", 17}, {"Math", 18}, {"English", 20}, {"History", 18}};
+::
+`book[0].title[1]` 是 {{h}}，`book[2].code` 是 {{20}}，`book[4].code` 是 {{0}}（没给的补 0，和环06 细2 一样）。
+::exam
+能打印出字母 h 的 => `printf("%c", book[0].title[1]);` @ 真选15·武科大2019
+::
+
+## d6 | 细6 sizeof 结构体 | 细6 | sizeof 结构体可能比成员加起来大
+`struct { char c; int x; }` 的成员是 1 + 4 = 5 字节，sizeof 却是 {{8}}：编译器会补空位，让 int 落在 4 的倍数上。
+
+考试一般问「至少多大」，或者按教材说「各成员之和」。具体补多少由编译器决定。
+
+## d7 | 细7 指针 ++ 跳一条 | 细7 | 指向结构体数组的指针：p++ 跳一整条
+`struct Stu s[2] = {{1, "A", 50}, {2, "B", 60}}, *p = s;` 执行 `p++;` 后 `p->num` 是 {{2}}：p 跳过了一整条记录，不是一个字节。道理和环11 细4 的指针相减一样，以「一个元素」为单位。
+
+## d8 | 细8 共用体 | 细8 | 共用体 union：所有成员共用一块内存
+`union U { int i; char c; double d; } u;`：
+- 大小至少是**最大的成员**：sizeof 是 {{8}}（double）。
+- 同一时刻只有**最后写进去的那个**有效：先 `u.i = 65;` 再 `u.d = 1.5;`，i 原来的值就被覆盖了。
+
+和结构体对比：结构体每个成员各有各的格子，大小至少是成员之和。
+
+## d9 | 细9 枚举 | 细9 | 枚举 enum：默认从 0 开始
+`enum color { RED, GREEN = 5, BLUE, BLACK };`：RED = {{0}}，GREEN = {{5}}，BLUE = {{6}}，BLACK = {{7}}。
+
+默认从 0 开始每个加 1；中间给了值，后面就从这个值接着往下加。枚举值是常量，不能被赋值。
+
+## d10 | 细10 typedef | 细10 | typedef 起别名，和 #define 不一样
+`typedef struct Stu STU;` 之后，`STU s;` 等于 `struct Stu s;`。typedef 不创造新类型，只是起个名字。
+
+和 #define 的区别在指针上最明显：
+::calc
+typedef int *PINT; PINT a, b; ‖ → ‖ a、b 都是指针
+#define PINT int * 后 PINT a, b; ‖ → ‖ 只有 a 是指针 ‖ 展开成 int *a, b;（环10 细1、环11 细1）
+::

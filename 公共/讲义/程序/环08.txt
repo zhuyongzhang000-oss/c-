@@ -1,0 +1,59 @@
+== 题1
+-- main
+int main(void)
+{
+    char s[100];
+    scanf("%s", s);
+    print_reverse(s);
+    return 0;
+}
+-- 输入
+abcde
+== 题2
+-- main
+int main(void)
+{
+    char s[100];
+    scanf("%s", s);
+    if (is_palindrome(s)) printf("回文\n");
+    else printf("非回文\n");
+    return 0;
+}
+-- 输入
+level
+== 题3
+-- main
+int main(void)
+{
+    char s[20];
+    int v;
+    scanf("%s", s);
+    v = str_to_int(s);
+    printf("%d\n", v + 1);          /* 加 1 看得出它真是整数了 */
+    return 0;
+}
+-- 输入
+123456
+== 题4
+-- main
+int main(void)
+{
+    char a[200], b[100];
+    scanf("%s%s", a, b);
+    my_strcat(a, b);
+    printf("%s\n", a);
+    return 0;
+}
+-- 输入
+Hello World
+== 题5
+-- main
+int main(void)
+{
+    char s1[100], s2[100];
+    scanf("%s%s", s1, s2);           /* 原题用 gets 读整行，VS 里改用 gets_s 或 scanf */
+    printf("%d\n", my_strcmp(s1, s2));
+    return 0;
+}
+-- 输入
+And Aid

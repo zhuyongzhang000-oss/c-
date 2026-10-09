@@ -1,0 +1,65 @@
+== 题1
+-- main
+int main(void)
+{
+    char s[100], t[100];
+    int k;
+    scanf("%s%d", s, &k);
+    copy_from_k(s, t, k);
+    printf("%s\n", t);
+    return 0;
+}
+-- 输入
+abcdefg 3
+== 题2
+-- main
+int main(void)
+{
+    char s1[100], s2[100];
+    scanf("%s%s", s1, s2);
+    printf("%d\n", my_strcmp(s1, s2));
+    return 0;
+}
+-- 输入
+BOY BAD
+== 题3
+-- main
+int main(void)
+{
+    int a[100], n, i;
+    scanf("%d", &n);
+    for (i = 0; i < n; i++) scanf("%d", a + i);
+    reverse(a, n);
+    for (i = 0; i < n; i++) printf("%d ", *(a + i));
+    printf("\n");
+    return 0;
+}
+-- 输入
+5
+1 2 3 4 5
+== 题4
+-- main
+int main(void)
+{
+    char s1[] = "  I am a student";
+    char s2[] = "abc";
+    printf("%d\n", find_len_word(s1, s2));   /* student 的 s 在下标 9 */
+    return 0;
+}
+== 题5
+-- main
+int main(void)
+{
+    int a[100], n, m, i;
+    scanf("%d", &n);
+    for (i = 0; i < n; i++) scanf("%d", a + i);
+    scanf("%d", &m);
+    move(a, n, m);
+    for (i = 0; i < n; i++) printf("%d ", a[i]);
+    printf("\n");
+    return 0;
+}
+-- 输入
+5
+1 2 3 4 5
+2

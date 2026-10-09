@@ -1,0 +1,139 @@
+@title 文件
+@short 文件
+@desc C 语言环13：fopen/fclose 四步、打开方式、fgetc/fputc、fgets/fputs、fprintf/fscanf、fread/fwrite、feof 的坑、fseek/rewind/ftell，以及 FILE、文本和二进制、EOF、stdin/stdout 等考点。
+@summary 转大写存文件、多行写入再读出、学生成绩写文件、两个文件合并排序、文件排序。细节：FILE *、r/w/a、EOF 是 −1、feof 多读一次、fgets 带回车、fclose。
+@intro 文件题的算法都是前面学过的（转大写、排序、合并），新的只有「从哪读、往哪写」。记住四步：**打开 → 判断是不是 NULL → 读写 → 关闭**，再记住几组读写函数和它们读到结尾时返回什么。
+
+== recall
+小写字母 c 变大写 => `c - 32` 或 `toupper(c)` @ 环02 细2
+`while (ch = getchar() != '\n')` 错在哪 => != 先算，ch 拿到的是 0 或 1 @ 环04 细4
+`scanf("%s", s);` 输入 «a b»，s 得到 => a（读到空格就停） @ 环08 细4
+读入一个 double 用的格式 => %lf @ 环01 细11
+按分数给结构体数组排序，交换的是 => 整条记录 @ 环12 ④
+==
+
+# p1 | 编程题怎么写 | 文件读写函数和屏幕输入输出一一对应，只是多了一个 fp。
+
+## gu | 骨架 | | 通用骨架
+::code
+FILE *fp = fopen("文件名", "r");          // 打开
+if (fp == NULL) {                          // 判断
+    printf("打开失败\n");
+    return 1;
+}
+while ((ch = fgetc(fp)) != EOF) { … }      // 读写；ch 定义成 int
+fclose(fp);                                // 关闭
+::
+
+## s1 | ① 四步 | ① | 打开 → 判断 → 读写 → 关闭
+每一步都不能少：
+- **不判 NULL**：文件打不开时（文件不存在、路径写错）fp 是 NULL，接着读写程序就崩溃。
+- **不 fclose**：写的内容可能还在缓冲区里，没真正写进文件（细8）。
+
+## s2 | ② 打开方式 | ② | 打开方式：r、w、a
+::calc
+"r" ‖ → ‖ 只读 ‖ 文件必须存在，不存在返回 NULL
+"w" ‖ → ‖ 只写 ‖ 不存在就新建；存在就先清空
+"a" ‖ → ‖ 追加 ‖ 写在原来内容的后面
+"r+" / "w+" / "a+" ‖ → ‖ 读写都行 ‖ 各自保留上面的特点（w+ 也会先清空）
+"rb"、"wb"…… ‖ → ‖ 二进制方式 ‖ 不加 b 是文本方式
+::
+~~想在文件后面接着写却用了 "w"~~，原来的内容就没了。
+::exam
+`fp = fopen(filename, "rb+");`（filename 里存的是 "paper"）=> 以读写方式打开二进制文件 paper @ 真选29·华南理工2018
+填空考 fopen 的打开方式 @ 川师卷
+::
+
+## s3 | ③ fgetc 和 fputc | ③ | 按字符读写：fgetc、fputc
+`fgetc(fp)` 读一个字符，读到文件尾返回 **EOF**（值是 −1）；`fputc(ch, fp)` 写一个字符。
+::code
+while ((ch = fgetc(fp)) != EOF) {     // 括号一个都不能少（回顾第 2 题）
+    fputc(toupper(ch), out);
+}
+::
+**ch 要定义成 int**：EOF 是 −1，用 char 接，有的编译器上永远等不到 EOF（细6）。
+
+一个写了 «hello file⏎second line⏎» 的文件，用这个循环数字符，一共 {{23}} 个（两个换行也算）。
+
+## s4 | ④ fgets 和 fputs | ④ | 按行读写：fgets 会把回车也读进来
+`fgets(line, 大小, fp)` 读一行，**行末的 `'\n'` 也在 line 里**；读到文件尾返回 NULL。`fputs(s, fp)` 写一个字符串，不会自动加换行。
+::code
+while (fgets(line, sizeof line, fp) != NULL)
+    printf("[%s]", line);
+::
+上面那个文件读出来是 «[hello file⏎]»：方括号里能看到回车也被读进来了。要去掉它，就把最后那个 `'\n'` 改成 `'\0'`（环08 ①）。
+
+## s5 | ⑤ fprintf 和 fscanf | ⑤ | 按格式读写：fprintf、fscanf
+和 printf、scanf 用法一样，只是第一个参数多一个 fp：
+::code
+fprintf(fp, "%d %s %.1f\n", s.num, s.name, s.score);
+
+while (fscanf(fp, "%d %s %lf", &num, name, &score) == 3)
+    …
+::
+fscanf 返回**成功读到几项**。这里要读 3 项，所以写 `== 3`；读到文件尾时返回的不是 3，循环就停了。
+
+题3、题5 都用这一对：fprintf 一行写一个学生，fscanf 一行读一个学生。
+
+## s6 | ⑥ fread 和 fwrite | ⑥ | 按块读写：fread、fwrite
+::code
+fwrite(地址, 每块多大, 写几块, fp);
+fread (地址, 每块多大, 读几块, fp);   // 返回成功读到的块数
+::
+把结构体数组原样存进文件、再原样读回来：`fwrite(stu, sizeof(struct Stud), 5, fp);`。要用二进制方式打开（"wb"、"rb"）。
+
+教材答案多用这一对写学生数据。这个仓库的题3 改用 fprintf 写文本，是为了测试能逐字检查。
+
+## s7 | ⑦ feof 的坑 | ⑦ | while (!feof(fp)) 会多处理一次
+feof 要等**读失败过一次**才变成真。所以：
+::code
+while (!feof(fp)) {
+    ch = fgetc(fp);
+    n++;
+}
+::
+文件里只有 «ab» 两个字符，这个循环却跑了 {{3}} 次：最后一次 fgetc 读到的是 EOF，n 也加了。
+
+正确写法是「**先读，再判断**」：`while ((ch = fgetc(fp)) != EOF)`。
+
+## s8 | ⑧ fseek、rewind、ftell | ⑧ | 文件位置：rewind、fseek、ftell
+- `rewind(fp)`：回到文件开头。
+- `fseek(fp, 偏移, 起点)`：移动位置。起点 `SEEK_SET`（开头，0）、`SEEK_CUR`（当前，1）、`SEEK_END`（末尾，2）。
+- `ftell(fp)`：当前位置离开头几个字节。
+
+`fseek(fp, 0, SEEK_END);` 之后 `ftell(fp)` 就是文件大小：«ab» 这个文件是 {{2}} 字节。
+
+# p2 | 文件的概念题 | 每一节最后附了真题的问法，灰色小字是出处。
+
+## d1 | 细1 FILE | 细1 | FILE 是一个结构体类型
+`FILE` 是 stdio.h 里定义的结构体类型，**大写**。程序里定义的是**指针** `FILE *fp;`。~~`file *fp`~~、~~`FILE fp`~~ 都不对。
+
+## d2 | 细2 文本和二进制 | 细2 | 文本方式和二进制方式
+文本方式在 Windows 上会转换换行（`'\n'` 和回车换行互转）；二进制方式原样读写。
+
+写给人看的（成绩单）用文本 + fprintf；写结构体、数组这种「内存原样」用二进制 + fwrite。
+
+## d3 | 细3 "w" 会清空 | 细3 | "w" 会先清空文件
+打开已有文件用 "w"，原来的内容立刻没了；想接在后面写用 "a"（②）。
+
+## d4 | 细4 feof 的返回值 | 细4 | feof(fp) 的返回值
+已经读到文件尾（读失败过）返回非 0；还没结束返回 {{0}}。
+::exam
+文件没有结束时 feof 的返回值 => 0 @ 真选28·华南理工2018
+::
+
+## d5 | 细5 文件名参数 | 细5 | fopen 的第一个参数：文件名字符串
+可以是常量 `"paper"`，也可以是存着文件名的字符数组：`char filename[] = "paper"; fopen(filename, "r")` 打开的是 paper，不是一个叫 filename 的文件。
+
+路径里的反斜杠要写两个：`"c:\\test\\out.dat"`（环02 细4 的转义）。
+
+## d6 | 细6 EOF 是 −1 | 细6 | EOF 是 −1，所以 ch 是 int
+`EOF` 的值是 {{-1}}。用 `char ch` 接 fgetc 的返回值，有的编译器上 char 存不下 −1，永远等不到 EOF；有的遇到 0xFF 这个字节会提前停。所以 **`int ch;`**。
+
+## d7 | 细7 stdin 和 stdout | 细7 | stdin、stdout 也是 FILE *
+键盘和屏幕也被当成文件：`fgetc(stdin)` 就是 `getchar()`，`fprintf(stdout, …)` 就是 `printf(…)`。
+
+所以「从键盘输入写进文件」的题，读键盘可以写成 `fgetc(stdin)`，和读文件是一样的代码。仓库里的题1、题2 就是把 in 当参数传进去，测试时 in 是一个文件，考试时就是 stdin。
+
+## d8 | 细8 要 fclose | 细8 | 打开过的文件要 fclose
+写文件时数据先放在缓冲区，攒够了才真正写进去。不 fclose，程序结束时最后那点数据可能还没写进文件。fclose 会把缓冲区的内容写完再关。

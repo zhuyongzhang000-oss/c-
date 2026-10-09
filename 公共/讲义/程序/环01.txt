@@ -1,0 +1,47 @@
+== 题1
+-- main
+int main(void)
+{
+    printf("e = %f\n", e_series(15));
+    return 0;
+}
+== 题2
+-- main
+int main(void)
+{
+    int a, n;
+    scanf("%d%d", &a, &n);
+    printf("s = %lld\n", repeat_sum(a, n));
+    return 0;
+}
+-- 输入
+3 5
+== 题3
+-- main
+int main(void)
+{
+    printf("前 20 项之和 = %f\n", frac_sum(20));
+    return 0;
+}
+== 题4
+-- main
+int main(void)
+{
+    double x;
+    scanf("%lf", &x);
+    printf("cos(%g) = %f\n", x, cos_series(x));
+    return 0;
+}
+-- 输入
+1.0
+== 题5
+-- main
+int main(void)
+{
+    int y, m, d;
+    scanf("%d%d%d", &y, &m, &d);
+    printf("是这一年的第 %d 天\n", day_of_year(y, m, d));
+    return 0;
+}
+-- 输入
+2024 3 1

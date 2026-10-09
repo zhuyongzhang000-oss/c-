@@ -1,0 +1,48 @@
+== 题1
+-- main
+int main(void)
+{
+    int n, sum = 0;
+    for (n = 2; n < 1000; n++)
+        if (is_prime(n)) sum += n;
+    printf("1000 以内的素数之和 = %d\n", sum);
+    return 0;
+}
+== 题2
+-- main
+int main(void)
+{
+    int m, n;
+    scanf("%d%d", &m, &n);
+    printf("最大公约数 %d，最小公倍数 %d\n", gcd(m, n), lcm(m, n));
+    return 0;
+}
+-- 输入
+12 18
+== 题3
+-- main
+int main(void)
+{
+    print_perfect(1000);
+    return 0;
+}
+== 题4
+-- main
+int main(void)
+{
+    int primes[100], n, i;
+    n = sieve(100, primes);
+    for (i = 0; i < n; i++) {
+        printf("%5d", primes[i]);
+        if ((i + 1) % 10 == 0) printf("\n");      /* 每行 10 个 */
+    }
+    printf("\n");
+    return 0;
+}
+== 题5
+-- main
+int main(void)
+{
+    print_primes(100, 200);
+    return 0;
+}

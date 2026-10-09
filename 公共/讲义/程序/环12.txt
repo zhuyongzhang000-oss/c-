@@ -1,0 +1,139 @@
+== 题1
+-- 前置
+struct Student {
+    int num;
+    char name[20];
+    double score[3];
+};
+-- main
+#define N 10
+
+int main(void)
+{
+    struct Student s[N];
+    double avg[3];
+    int i, b;
+    for (i = 0; i < N; i++)
+        scanf("%d%s%lf%lf%lf", &s[i].num, s[i].name, &s[i].score[0], &s[i].score[1], &s[i].score[2]);
+    course_avg(s, N, avg);
+    printf("三门课的平均分：%.2f %.2f %.2f\n", avg[0], avg[1], avg[2]);
+    b = best_student(s, N);
+    printf("最高分：%d %s %.1f %.1f %.1f 平均 %.2f\n", s[b].num, s[b].name,
+           s[b].score[0], s[b].score[1], s[b].score[2],
+           (s[b].score[0] + s[b].score[1] + s[b].score[2]) / 3);
+    return 0;
+}
+-- 输入
+101 Li 80 90 70
+102 Wang 85 75 95
+103 Zhang 90 92 94
+104 Liu 60 70 80
+105 Chen 88 66 77
+106 Yang 70 80 90
+107 Zhao 95 85 75
+108 Huang 66 77 88
+109 Zhou 78 82 86
+110 Wu 91 89 87
+== 题2
+-- 前置
+struct Date {
+    int year, month, day;
+};
+-- main
+int main(void)
+{
+    struct Date d;
+    scanf("%d%d%d", &d.year, &d.month, &d.day);
+    printf("第 %d 天\n", day_of_year2(d));
+    return 0;
+}
+-- 输入
+2024 3 1
+== 题3
+-- 前置
+struct Student {
+    int num;
+    char name[20];
+    double score[3];
+};
+-- main
+#define N 5
+
+int main(void)
+{
+    struct Student s[N];
+    int i;
+    for (i = 0; i < N; i++)
+        scanf("%d%s%lf%lf%lf", &s[i].num, s[i].name, &s[i].score[0], &s[i].score[1], &s[i].score[2]);
+    print(s, N);
+    return 0;
+}
+-- 输入
+101 Li 88 92.5 79
+102 Wang 75 80 85
+103 Zhang 90 91 92
+104 Liu 60 65 70
+105 Chen 82 78 88
+== 题4
+-- 前置
+typedef struct {
+    char num[10];
+    int s;
+} STREC;
+-- main
+#define N 8
+
+int main(void)
+{
+    STREC s[N] = {{"GA005", 85}, {"GA003", 76}, {"GA002", 69}, {"GA004", 85},
+                  {"GA001", 91}, {"GA007", 72}, {"GA008", 64}, {"GA006", 87}};
+    int i;
+    fun(s, N);
+    for (i = 0; i < N; i++) printf("%s %d\n", s[i].num, s[i].s);
+    return 0;
+}
+== 题5
+-- 前置
+struct Node {
+    int num;
+    struct Node *next;
+};
+-- main
+/* 建链表（教材例 9.9 的做法）：读到 0 结束 */
+struct Node *creat(void)
+{
+    struct Node *head = NULL, *tail = NULL, *p;
+    int num;
+    scanf("%d", &num);
+    while (num != 0) {
+        p = (struct Node *)malloc(sizeof(struct Node));
+        p->num = num;
+        p->next = NULL;
+        if (head == NULL) head = p;
+        else tail->next = p;
+        tail = p;
+        scanf("%d", &num);
+    }
+    return head;
+}
+
+void print_list(struct Node *head)
+{
+    struct Node *p;
+    for (p = head; p != NULL; p = p->next) printf("%d ", p->num);
+    printf("\n");
+}
+
+int main(void)
+{
+    struct Node *head;
+    int num;
+    head = creat();
+    scanf("%d", &num);                 /* 要删的学号 */
+    head = del(head, num);
+    print_list(head);
+    return 0;
+}
+-- 输入
+101 102 103 104 0
+103

@@ -1,0 +1,81 @@
+== 题1
+-- main
+int main(void)
+{
+    save_upper(stdin, "test");       /* 键盘就是 stdin */
+    return 0;
+}
+-- 输入
+Hello, world! 后面的不要
+-- 显示文件 test
+== 题2
+-- main
+int main(void)
+{
+    save_lines(stdin, "text.txt");   /* 输入完按 Ctrl+Z（Windows）结束 */
+    show_upper("text.txt");
+    return 0;
+}
+-- 输入
+I love C.
+File is easy.
+== 题3
+-- 前置
+struct Stud {
+    int num;
+    char name[20];
+    double score[3];
+    double avg;
+};
+-- main
+#define N 5
+
+int main(void)
+{
+    struct Stud s[N];
+    int i;
+    for (i = 0; i < N; i++)
+        scanf("%d%s%lf%lf%lf", &s[i].num, s[i].name, &s[i].score[0], &s[i].score[1], &s[i].score[2]);
+    save_students(s, N, "stud");
+    return 0;
+}
+-- 输入
+101 Li 80 90 70
+102 Wang 85 75 95
+103 Zhang 90 92 94
+104 Liu 60 70 80
+105 Chen 88 66 77
+-- 显示文件 stud
+== 题4
+-- main
+int main(void)
+{
+    merge_files("A", "B", "C");
+    return 0;
+}
+-- 文件 A
+dbfa
+-- 文件 B
+ecg
+-- 显示文件 C
+== 题5
+-- 前置
+struct Stud {
+    int num;
+    char name[20];
+    double score[3];
+    double avg;
+};
+-- main
+int main(void)
+{
+    sort_file("stud", "stu_sort");
+    return 0;
+}
+-- 文件 stud
+101 Li 80.0 90.0 70.0 80.00
+102 Wang 85.0 75.0 95.0 85.00
+103 Zhang 90.0 92.0 94.0 92.00
+104 Liu 60.0 70.0 80.0 70.00
+105 Chen 88.0 66.0 77.0 77.00
+-- 显示文件 stu_sort

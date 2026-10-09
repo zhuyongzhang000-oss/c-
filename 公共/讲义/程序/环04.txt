@@ -1,0 +1,35 @@
+== 题1
+-- main
+int main(void)
+{
+    chicken_rabbit(35, 94);      /* 打印：鸡 兔 */
+    return 0;
+}
+== 题2
+-- main
+int main(void)
+{
+    exchange(100);
+    return 0;
+}
+== 题3
+-- main
+int main(void)
+{
+    printf("%d\n", count_ways(100));
+    return 0;
+}
+== 题4
+-- main
+int main(void)
+{
+    print_pairs();
+    return 0;
+}
+== 题5
+-- main
+int main(void)
+{
+    hundred_chickens();
+    return 0;
+}

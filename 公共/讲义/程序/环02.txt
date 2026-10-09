@@ -1,0 +1,52 @@
+== 题1
+-- main
+int main(void)
+{
+    int x;
+    for (x = 100; x <= 999; x++)
+        if (is_narcissus(x)) printf("%d\n", x);
+    return 0;
+}
+== 题2
+-- main
+int main(void)
+{
+    int x;
+    for (x = 100; x <= 999; x++)
+        if (check(x)) printf("%d\n", x);
+    return 0;
+}
+== 题3
+-- main
+int main(void)
+{
+    int n;
+    char out[40];
+    scanf("%d", &n);
+    to_binary(n, out);
+    printf("%s\n", out);
+    return 0;
+}
+-- 输入
+13
+== 题4
+-- main
+int main(void)
+{
+    int x;
+    for (x = 1; x <= 99; x++)
+        if (is_automorphic(x)) printf("%d ", x);
+    printf("\n");
+    return 0;
+}
+== 题5
+-- main
+int main(void)
+{
+    int n;
+    scanf("%d", &n);
+    printf("%d\n", count_one(n));
+    return 0;
+}
+-- 输入
+13

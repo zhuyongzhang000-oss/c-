@@ -1,0 +1,39 @@
+== 题1
+-- main
+int main(void)
+{
+    triangle(5);
+    return 0;
+}
+== 题2
+-- main
+int main(void)
+{
+    shifted(4);
+    return 0;
+}
+== 题3
+-- main
+int main(void)
+{
+    diamond(4);
+    return 0;
+}
+== 题4
+-- main
+int main(void)
+{
+    slanted(5);
+    return 0;
+}
+== 题5
+-- main
+int main(void)
+{
+    int n;
+    scanf("%d", &n);
+    yanghui(n);
+    return 0;
+}
+-- 输入
+6
