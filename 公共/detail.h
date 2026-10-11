@@ -98,4 +98,34 @@ static inline int d_summary(const char *ring) {
     return 0;
 }
 
+#ifdef D_DUMP
+/* 学习台网页判分用：编译时加 D_DUMP，每道猜输出题只打印一行  @@G 题号 "实际输出"，
+   不判分、不打印标题和汇总。平时在 VS 里编译不会走到这里。 */
+static inline void d_json(const char *s) {
+    putchar('"');
+    for (; *s; s++) {
+        unsigned char c = (unsigned char)*s;
+        if (c == '"' || c == '\\') { putchar('\\'); putchar(c); }
+        else if (c == '\n') printf("\\n");
+        else if (c == '\t') printf("\\t");
+        else if (c == '\r') printf("\\r");
+        else if (c < 0x20) printf("\\u%04x", c);
+        else putchar(c);
+    }
+    putchar('"');
+}
+static inline void d_dump_guess(int no, const char *guess) {
+    (void)guess;
+    printf("@@G %d ", no);
+    d_json(d_out);
+    printf("\n");
+    d_out[0] = '\0';
+}
+static inline void d_dump_judge(int no, char ans) { (void)no; (void)ans; }
+#define GUESS d_dump_guess
+#define JUDGE d_dump_judge
+#define d_section(title) ((void)0)
+#define d_summary(ring) (fflush(stdout), 0)
+#endif
+
 #endif
